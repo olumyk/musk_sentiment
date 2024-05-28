@@ -1,0 +1,86 @@
+
+# create athena table for clean dataset
+# this table is used in in dashboard for creating average followers by sentiment and distribution of sentiment/labels
+CREATE EXTERNAL TABLE IF NOT EXISTS `BigDataPro_Quicksight`.`clean_dataset` (
+  `tweet` string COMMENT 'the tweet is a cleaned list of document',
+  `followers` integer,
+  `location` string,
+  `date_time` string,
+  `label` integer COMMENT 'label is generateg from pretrained model from Hugging face Xformer'
+) COMMENT "Cleaned and Labelled Dataset"
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH SERDEPROPERTIES (
+  'field.delim' = '\t',
+  'collection.delim' = '\u0002',
+  'mapkey.delim' = '\u0003'
+)
+STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION 's3://bigdatapro/Project/clean_dataset/';
+
+
+
+# create athena table for prediction dataset
+# this table is used in in dashboard for creating model prediction accuracy, confussion matrix, predicted and actual label charts
+CREATE EXTERNAL TABLE IF NOT EXISTS `bigdatapro_quicksight`.`prediction_dataset` (
+  `tweet` string,
+  `followers` integer,
+  `location` string,
+  `date_time` timestamp,
+  `label` integer,
+  `prediction` double
+) COMMENT "Logistic Regression Prediction"
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH SERDEPROPERTIES (
+  'field.delim' = '\t',
+  'collection.delim' = '\u0002',
+  'mapkey.delim' = '\u0003'
+)
+STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION 's3://bigdatapro/Project/prediction_dataset/';
+
+
+
+# create athena table for topic and sentiments dataset
+# this table is used in in dashboard for creating word cloud of sum of followers by tweet, and for table to group tweets by sentiment and topic
+CREATE EXTERNAL TABLE IF NOT EXISTS `bigdatapro_quicksight`.`topic_dataset1` (
+  `tweet` string,
+  `label` integer,
+  `followers` integer,
+  `topic` integer,
+  `documents` string
+) COMMENT "this is an updated table of clean dataset with a new column to give each row a topic category.
+it also have a cleaner tweet column called document, where the stopping words in tweet are removed"
+ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
+LOCATION 's3://bigdatapro/Project/topic_dataset1/'
+TBLPROPERTIES ('classification' = 'parquet');
+
+
+
+# creat a table for topic_dataset2
+# this table is not used in the dashboard
+CREATE EXTERNAL TABLE IF NOT EXISTS `bigdatapro_quicksight`.`topic_dataset2` (
+  `topic_index` int,
+  `top_words` array < string >
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
+LOCATION 's3://bigdatapro/Project/topic_dataset2/'
+TBLPROPERTIES ('classification' = 'parquet');
+
+
+
+# create athena table for frequency/count of tweets by topic
+# this table is used in in dashboard for creating average number of tweets by topic
+CREATE EXTERNAL TABLE IF NOT EXISTS `bigdatapro_quicksight`.`topics_freq` (`topic_index` int, `topic_count` integer)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH SERDEPROPERTIES (
+  'field.delim' = '\,',
+  'collection.delim' = '\u0002',
+  'mapkey.delim' = '\u0003'
+)
+STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION 's3://bigdatapro/Project/topics_freq/';
+
+
+
