@@ -33,6 +33,7 @@ This project collects, preprocesses, and analyzes Twitter data mentioning Elon M
    - Created pipelines for the trained models and exported the resulting datasets to a private S3 bucket for further analysis.
 
 7. Visualization and Interpretation
-   - Generated tables from the stored dataset using AWS Athena.
+   - Generated tables from the stored dataset using AWS Athena (check file named: AthenaSQLqueries)
    - Visualized the curated data in a QuickSight dashboard to provide insights and trends.
 
+NB: "BigDataProject 20240520.dbc" and "full_project.ipynb" has same contents; they include both pipelines and data processing steps
