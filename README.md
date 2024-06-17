@@ -1,4 +1,5 @@
 # musk_sentiment
+This pipeline ingests real-time tweets via Twitter API through Kinesis Firehose, processes them in Azure Databricks, stores results in S3, analyzes with Athena, and visualizes with QuickSight
 
 # Twitter Sentiment and Topic Analysis on Elon Musk
 
